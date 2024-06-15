@@ -1,29 +1,31 @@
-use std::time::Duration;
 use bevy::prelude::*;
+use plugins::*;
 
-#[derive(Resource)]
-struct BeatTimer(Timer);
+mod plugins;
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Default ,Debug, States)]
+enum GameState{
+    #[default]
+    Intro,
+    Menu,
+    GameSetup,
+}
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Update, beat)
-        .add_systems(Startup, greet)
+        .add_plugins((
+            DefaultPlugins,
+            intro::plugin,
+            menu::plugin,
+            game_setup::plugin,
+        ))
+        .add_systems(Startup, setup)
+        .init_state::<GameState>()
         .run();
 }
 
-fn greet(
-    mut commands: Commands,
-) {
-    println!("Hello!");
-    commands.insert_resource(BeatTimer(Timer::new(Duration::from_secs(1), TimerMode::Repeating)));
-}
-
-fn beat (
-    mut beat_timer: ResMut<BeatTimer>,
-    time: Res<Time>
-) {
-    if beat_timer.0.tick(time.delta()).just_finished() {
-        println!("Beat");
-    }
+fn setup(
+    mut commands: Commands
+){
+    commands.spawn(Camera2dBundle::default());
 }
